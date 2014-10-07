@@ -189,7 +189,7 @@ module CoreFoundation
     @CFRelease ||= Fiddle::Function.new(image['CFRelease'], [CFTypeRef], Void)
   end
 
-  def self.extern(symbol, parameter_types, return_type)
+  def self.extern_image(image, symbol, parameter_types, return_type)
     symbol = symbol.to_s
     create_function = symbol.include?('Create')
     function_cache_key = "@__#{symbol}__"
@@ -211,6 +211,10 @@ module CoreFoundation
       result = function.call(*args)
       create_function ? CFAutoRelease(result) : result
     end
+  end
+
+  def self.extern(symbol, parameter_types, return_type)
+    extern_image(image, symbol, parameter_types, return_type)
   end
 
   public
