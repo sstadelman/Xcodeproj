@@ -38,7 +38,7 @@ module Xcodeproj
         end
         path = path.to_s
 
-        if DevToolsCore.load_xcode_frameworks
+        if DevToolsCore.load_xcode_frameworks && path.end_with?('pbxproj')
           ruby_hash_write_xcode(hash, path)
         else
           CoreFoundation.RubyHashPropertyListWrite(hash, path)
