@@ -91,8 +91,8 @@ module ProjectSpecs
         hash = {
           'hash'   => { 'a hash' => 'in a hash' },
           'string' => 'string',
-          'true_bool' => true,
-          'false_bool' => false,
+          'true_bool' => '1',
+          'false_bool' => '0',
           'array'  => ['string in an array', { 'a hash' => 'in an array' }],
         }
         Xcodeproj.write_plist(hash, @plist)
