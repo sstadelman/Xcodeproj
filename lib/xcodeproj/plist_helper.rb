@@ -89,6 +89,8 @@ end
 module Fiddle
   SIZEOF_INTPTR_T = DL::SIZEOF_VOIDP unless defined?(SIZEOF_INTPTR_T)
   NULL = DL::NULL unless defined?(NULL)
+  Handle = DL::Handle unless defined?(Handle)
+  DLError = DL::DLError unless defined?(DLError)
 
   unless respond_to?(:dlopen)
     def self.dlopen(library)
