@@ -1,5 +1,6 @@
 require 'fiddle'
 require 'dl' if RUBY_VERSION == '1.9.3'
+require 'pathname'
 
 module Xcodeproj
   # TODO: Delete me (compatibility with Ruby 1.8.7 C ext bundle)
