@@ -40,11 +40,12 @@ module Xcodeproj
         end
         path = path.to_s
 
+        success = false
         if DevToolsCore.load_xcode_frameworks && path.end_with?('pbxproj')
-          ruby_hash_write_xcode(hash, path)
-        else
-          CoreFoundation.RubyHashPropertyListWrite(hash, path)
+          success = ruby_hash_write_xcode(hash, path)
         end
+
+        CoreFoundation.RubyHashPropertyListWrite(hash, path) unless success
       end
 
       # @return [Hash] Returns the native objects loaded from a property list
@@ -86,7 +87,7 @@ module Xcodeproj
           success = false
         end
 
-        CoreFoundation.RubyHashPropertyListWrite(hash, path) unless success
+        success
       end
     end
   end
