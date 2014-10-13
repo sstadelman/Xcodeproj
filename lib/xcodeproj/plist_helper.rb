@@ -80,6 +80,7 @@ module Xcodeproj
 
           project = DevToolsCore::PBXProject.new(path)
           success &= project.writeToFileSystemProjectFile
+          project.close
         rescue Fiddle::DLError
           success = false
         end
@@ -648,6 +649,17 @@ module DevToolsCore
           CoreFoundation.NSSelectorFromString(CoreFoundation.RubyStringToCFString(selector)),
           CoreFoundation.RubyStringToCFString(path))
       end
+    end
+
+    # Closes the project, needed if one creates multiple instances in one session
+    def close
+      selector = 'close'
+      return unless NSObject.respondsToSelector(@project, selector)
+
+      close = PBXProject.objc_msgSend([], CoreFoundation::Void)
+      close.call(
+        @project,
+        CoreFoundation.NSSelectorFromString(CoreFoundation.RubyStringToCFString(selector)))
     end
 
     #
