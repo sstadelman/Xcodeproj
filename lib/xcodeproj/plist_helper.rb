@@ -62,6 +62,14 @@ module Xcodeproj
 
       private
 
+      # Serializes a hash as an ASCII property list file, using Xcode private API.
+      #
+      # @param  [#to_hash] hash
+      #         The hash to store.
+      #
+      # @param  [#to_s] path
+      #         The path of the file.
+      #
       def ruby_hash_write_xcode(hash, path)
         success = true
 
@@ -485,6 +493,7 @@ module CoreFoundation
   # rubocop:enable Style/VariableName
 end
 
+# This module provides access to Xcode private API for writing ASCII plists.
 module DevToolsCore
   def self.silence_stderr
     begin
@@ -515,6 +524,16 @@ module DevToolsCore
       CoreFoundation.extern_image(image, symbol, parameter_types, return_type)
     end
 
+    # @return [Fiddle::Function] Returns a callable function, which calls objc_msgSend
+    #         with the correct arguments and return type.
+    #
+    # @param  [#to_a] args
+    #         The user-defined arguments of the ObjC method, self and _cmd will be
+    #         automatically prepended.
+    #
+    # @param  return_type
+    #         Optional return type of the ObjC method, id is default.
+    #
     def self.objc_msgSend(args, return_type = CoreFoundation::VoidPointer)
       arguments = [CoreFoundation::VoidPointer, CoreFoundation::VoidPointer] + args
 
@@ -549,6 +568,7 @@ module DevToolsCore
       nil
   end
 
+  # Load Xcode3Core plugin and its dependencies
   def self.load_xcode_frameworks
     load_xcode_framework('SharedFrameworks/DVTFoundation.framework/DVTFoundation')
     load_xcode_framework('SharedFrameworks/DVTSourceControl.framework/DVTSourceControl')
@@ -564,6 +584,10 @@ module DevToolsCore
       @dictionary = dictionary
     end
 
+    # Serializes a hash as an XML property list file.
+    #
+    # @return   NSData with ASCII plist representation of the receiver
+    #
     def plistDescriptionUTF8Data
       selector = 'plistDescriptionUTF8Data'
       return nil unless NSObject.respondsToSelector(@dictionary, selector)
@@ -586,6 +610,10 @@ module DevToolsCore
       @data = data
     end
 
+    # @return   true if successful, false otherwise
+    #
+    # @param [String] target path to write to
+    #
     def writeToFileAtomically(path)
       selector = 'writeToFile:atomically:'
       return false unless NSObject.respondsToSelector(@data, selector)
@@ -595,14 +623,16 @@ module DevToolsCore
         @data,
         CoreFoundation.NSSelectorFromString(CoreFoundation.RubyStringToCFString(selector)),
         CoreFoundation.RubyStringToCFString(path),
-        1)
+        1) # atomically
       result == CoreFoundation::TRUE ? true : false
     end
   end
 
+  # Xcode internal class which represents a project file
   class PBXProject < NSObject
     public
 
+    # Initialize Xcode and a new PBXProject instance
     def initialize(path)
       DevToolsCore.silence_stderr do
         CoreFoundation.IDEInitialize(1, CoreFoundation::NULL)
@@ -620,6 +650,11 @@ module DevToolsCore
       end
     end
 
+    #
+    # Writes the project file to disk.
+    #
+    # @return true if successful, false otherwise
+    #
     def writeToFileSystemProjectFile
       selector = 'writeToFileSystemProjectFile:userFile:checkNeedsRevert:'
       return unless NSObject.respondsToSelector(@project, selector)
@@ -628,9 +663,9 @@ module DevToolsCore
       result = writeToFile.call(
         @project,
         CoreFoundation.NSSelectorFromString(CoreFoundation.RubyStringToCFString(selector)),
-        1,
-        0,
-        1)
+        1, # write project file
+        0, # write xcuserdata
+        1) # check needs revert (unknown what this actually means)
       result == CoreFoundation::TRUE ? true : false
     end
 
@@ -640,6 +675,7 @@ module DevToolsCore
       @image ||= DevToolsCore.load_xcode_frameworks
     end
 
+    # Functions for initializing Xcode internals, need to be called initially.
     extern :IDEInitialize, [CoreFoundation::Boolean, ID], CoreFoundation::Void
     extern :XCInitializeCoreIfNeeded, [CoreFoundation::Boolean], CoreFoundation::Void
   end
