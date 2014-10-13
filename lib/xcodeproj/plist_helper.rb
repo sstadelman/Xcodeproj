@@ -1,5 +1,5 @@
 require 'fiddle'
-require 'dl'
+require 'dl' if RUBY_VERSION == '1.9.3'
 
 module Xcodeproj
   # TODO: Delete me (compatibility with Ruby 1.8.7 C ext bundle)
@@ -233,7 +233,7 @@ module CoreFoundation
   end
 
   def self.free_function
-    @free_function ||= Fiddle::Function.new(DL::Handle.new['free'], [VoidPointer], Void)
+    @free_function ||= Fiddle::Function.new(Fiddle::Handle.new['free'], [VoidPointer], Void)
   end
 
   def self.CFRelease_function
