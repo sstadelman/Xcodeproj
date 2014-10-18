@@ -73,6 +73,7 @@ module Xcodeproj
       #         The path of the file.
       #
       def ruby_hash_write_xcode(hash, path)
+        path = (Pathname.pwd + path).to_s unless Pathname.new(path).absolute?
         success = true
 
         begin

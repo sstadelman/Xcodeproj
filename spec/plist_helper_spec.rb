@@ -225,6 +225,11 @@ EOS
         touch_project('Emoji.xcodeproj')
       end
 
+      it 'allows writing to a relative path' do
+        relative_path = Pathname.new('tmp/Cocoa Application.xcodeproj')
+        relative_path.mkpath
+        touch_project('Cocoa Application.xcodeproj', relative_path + 'project.pbxproj')
+      end
     end
 
   end
