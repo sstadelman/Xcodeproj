@@ -164,7 +164,7 @@ EOS
       end
 
       def write_temp_file_and_compare(sample)
-        temp_file = File.join(SpecHelper.temporary_directory, 'out.plist')
+        temp_file = File.join(SpecHelper.temporary_directory, 'out.pbxproj')
         Xcodeproj.write_plist(sample, temp_file)
         result = Xcodeproj.read_plist(temp_file)
 
@@ -185,7 +185,7 @@ EOS
       end
 
       it 'will fallback to XML encoding if Xcode classes cannot be found' do
-        DevToolsCore::NSObject.stubs(:objc_class).returns('lol')
+        DevToolsCore::NSObject.stubs(:objc_class).returns(nil)
 
         write_temp_file_and_compare(read_sample)
       end
@@ -207,9 +207,9 @@ EOS
         File.join(dir, 'project.pbxproj')
       end
 
-      def touch_project(name)
+      def touch_project(name, temporary = nil)
         fixture = setup_fixture(name)
-        temporary = setup_temporary(name)
+        temporary = setup_temporary(name) if temporary.nil?
 
         hash = Xcodeproj.read_plist(fixture)
         Xcodeproj.write_plist(hash, temporary)
