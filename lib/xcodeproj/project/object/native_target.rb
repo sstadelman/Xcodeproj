@@ -194,7 +194,7 @@ module Xcodeproj
         # @return [void]
         #
         def add_dependency(target)
-          unless dependencies.map(&:target).include?(target)
+          unless dependency_for_target(target)
             container_proxy = project.new(Xcodeproj::Project::PBXContainerItemProxy)
             if target.project == project
               container_proxy.container_portal = project.root_object.uuid
@@ -203,15 +203,33 @@ module Xcodeproj
               raise ArgumentError, 'add_dependency got target that belongs to a project is not this project and is not a subproject of this project' unless subproject_reference
               container_proxy.container_portal = subproject_reference.uuid
             end
-            container_proxy.proxy_type = '1'
+            container_proxy.proxy_type = Constants::PROXY_TYPES[:native_target]
             container_proxy.remote_global_id_string = target.uuid
             container_proxy.remote_info = target.name
 
             dependency = project.new(Xcodeproj::Project::PBXTargetDependency)
-            dependency.target = target
+            dependency.name = target.name
+            dependency.target = target if target.project == project
             dependency.target_proxy = container_proxy
 
             dependencies << dependency
+          end
+        end
+
+        # Checks whether this target has a dependency on the given target.
+        #
+        # @param  [AbstractTarget] target
+        #         the target to search for.
+        #
+        # @return [PBXTargetDependency]
+        #
+        def dependency_for_target(target)
+          dependencies.find do |dep|
+            if dep.target_proxy.remote?
+              dep.target_proxy.remote_global_id_string == target.uuid
+            else
+              dep.target == target
+            end
           end
         end
 
@@ -382,10 +400,12 @@ module Xcodeproj
         # @param  [Hash{String=>String}] compiler_flags
         #         the compiler flags for the source files.
         #
-        # @return [void]
+        # @yield_param [PBXBuildFile] each created build file.
+        #
+        # @return [Array<PBXBuildFile>] the created build files.
         #
         def add_file_references(file_references, compiler_flags = {})
-          file_references.each do |file|
+          file_references.map do |file|
             build_file = project.new(PBXBuildFile)
             build_file.file_ref = file
 
@@ -399,6 +419,10 @@ module Xcodeproj
               end
               source_build_phase.files << build_file
             end
+
+            yield build_file if block_given?
+
+            build_file
           end
         end
 
@@ -424,19 +448,7 @@ module Xcodeproj
         # @return [PBXHeadersBuildPhase] the headers build phase.
         #
         def headers_build_phase
-          unless @headers_build_phase
-            headers_build_phase = build_phases.find { |bp| bp.class == PBXHeadersBuildPhase }
-            unless headers_build_phase
-              # Working around a bug in Xcode 4.2 betas, remove this once the
-              # Xcode bug is fixed:
-              # https://github.com/alloy/cocoapods/issues/13
-              # phase = copy_header_phase || headers_build_phases.first
-              headers_build_phase = project.new(PBXHeadersBuildPhase)
-              build_phases << headers_build_phase
-            end
-            @headers_build_phase = headers_build_phase
-          end
-          @headers_build_phase
+          find_or_create_build_phase_by_class(PBXHeadersBuildPhase)
         end
 
         # Finds or creates the source build phase of the target.
@@ -446,15 +458,7 @@ module Xcodeproj
         # @return [PBXSourcesBuildPhase] the source build phase.
         #
         def source_build_phase
-          unless @source_build_phase
-            source_build_phase = build_phases.find { |bp| bp.class == PBXSourcesBuildPhase }
-            unless source_build_phase
-              source_build_phase = project.new(PBXSourcesBuildPhase)
-              build_phases << source_build_phase
-            end
-            @source_build_phase = source_build_phase
-          end
-          @source_build_phase
+          find_or_create_build_phase_by_class(PBXSourcesBuildPhase)
         end
 
         # Finds or creates the frameworks build phase of the target.
@@ -464,12 +468,7 @@ module Xcodeproj
         # @return [PBXFrameworksBuildPhase] the frameworks build phase.
         #
         def frameworks_build_phase
-          phase = build_phases.find { |bp| bp.class == PBXFrameworksBuildPhase }
-          unless phase
-            phase = project.new(PBXFrameworksBuildPhase)
-            build_phases << phase
-          end
-          phase
+          find_or_create_build_phase_by_class(PBXFrameworksBuildPhase)
         end
 
         # Finds or creates the resources build phase of the target.
@@ -479,12 +478,27 @@ module Xcodeproj
         # @return [PBXResourcesBuildPhase] the resources build phase.
         #
         def resources_build_phase
-          phase = build_phases.find { |bp| bp.class == PBXResourcesBuildPhase }
-          unless phase
-            phase = project.new(PBXResourcesBuildPhase)
-            build_phases << phase
+          find_or_create_build_phase_by_class(PBXResourcesBuildPhase)
+        end
+
+        private
+
+        # @!group Internal Helpers
+        #--------------------------------------#
+
+        # Find or create a build phase by a given class
+        #
+        # @param [Class] phase_class the class of the build phase to find or create.
+        #
+        # @return [AbstractBuildPhase] the build phase whose class match the given phase_class.
+        #
+        def find_or_create_build_phase_by_class(phase_class)
+          @phases ||= {}
+          unless phase_class < AbstractBuildPhase
+            raise ArgumentError, "#{phase_class} must be a subclass of #{AbstractBuildPhase.class}"
           end
-          phase
+          @phases[phase_class] ||= build_phases.find { |bp| bp.class == phase_class } \
+            || project.new(phase_class).tap { |bp| build_phases << bp }
         end
 
         public

@@ -150,6 +150,12 @@ EOS
         end.should.raise TypeError
       end
 
+      it 'will not crash when using an empty path' do
+        lambda do
+          Xcodeproj.write_plist({}, '')
+        end.should.raise IOError
+      end
+
     end
 
     #-------------------------------------------------------------------------#

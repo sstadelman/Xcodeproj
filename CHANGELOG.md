@@ -1,5 +1,51 @@
 # Xcodeproj Changelog
 
+## 0.20.0
+
+###### Breaking
+
+* Support for Ruby < 2.0.0 has been dropped. Xcodeproj now depends on
+  Ruby 2.0.0 or greater.  
+  [Kyle Fuller](https://github.com/kylef)
+
+
+###### Enhancements
+
+* `Project`: Recognize merge conflicts and raise a helpful error.  
+  [Marius Rackwitz](https://github.com/mrackwitz)
+  [Xcodeproj#192](https://github.com/CocoaPods/Xcodeproj/pull/192)
+
+* `PBXContainerItemProxy`: Allow access to the proxied object.  
+  [Marius Rackwitz](https://github.com/mrackwitz)
+  [Xcodeproj#178](https://github.com/CocoaPods/Xcodeproj/pull/178)
+
+
+###### Minor Enhancements
+
+* `PBXCopyFilesBuildPhase`: Add a convenience method `symbol_dst_subfolder_spec`
+  to set the destination subfolder specification by a symbol.  
+  [Marius Rackwitz](https://github.com/mrackwitz)
+  [Xcodeproj#187](https://github.com/CocoaPods/Xcodeproj/pull/187)
+
+* `PBXNativeTarget`: Return newly created build files by `add_file_references`
+  and yield each one to allow direct modification of its settigs.  
+  [Marius Rackwitz](https://github.com/mrackwitz)
+  [Xcodeproj#187](https://github.com/CocoaPods/Xcodeproj/pull/187)
+
+
+###### Bug Fixes
+
+* `PBXNativeTarget`: Fixed the creation of target dependencies, which refer
+  to subprojects.  
+  [Marius Rackwitz](https://github.com/mrackwitz)
+  [Xcodeproj#178](https://github.com/CocoaPods/Xcodeproj/pull/178)
+
+* `PBXReferenceProxy`: Added the missing attribute name, which could appear when
+  external frameworks are referenced.
+  [Marius Rackwitz](https://github.com/mrackwitz)
+  [Xcodeproj#189](https://github.com/CocoaPods/Xcodeproj/pull/189)
+
+
 ## 0.19.4
 
 ###### Bug Fixes
@@ -7,6 +53,10 @@
 * `PlistHelper`: Add support for Ruby 1.9.3's implementation of `Fiddle`.  
   [Eloy Durán](https://github.com/alloy)
   [Xcodeproj#206](https://github.com/CocoaPods/Xcodeproj/issues/206)
+
+* Stop re-writing config files if they have not changed.  
+  [Kyle Fuller](https://github.com/kylef)
+  [Boris Bügling](https://github.com/neonichu)
 
 
 ## 0.19.3
@@ -117,6 +167,7 @@
   [Fabio Pelosin](https://github.com/fabiopelosin)
   [Xcodeproj#105](https://github.com/CocoaPods/Xcodeproj/pull/150)
 
+
 ## 0.16.1
 
 ###### Minor Enhancements
@@ -128,6 +179,7 @@
 
 * [Xcodeproj::Project#reference_for_path] Support for string parameter.  
   [jlj](https://github.com/jlj)
+
 
 ## 0.16.0
 
@@ -425,6 +477,7 @@
 * Build configurations are now deeply copied.
   [CocoaPods/CocoaPods#1288](https://github.com/CocoaPods/CocoaPods/issues/1322),
 
+
 ## 0.10.0
 
 ###### Breaking
@@ -498,4 +551,3 @@
 ###### Bug Fixes
 
 * The file type of the frameworks file references has be corrected.
-

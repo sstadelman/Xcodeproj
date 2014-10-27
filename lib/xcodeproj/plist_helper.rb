@@ -1,5 +1,4 @@
 require 'fiddle'
-require 'dl' if RUBY_VERSION == '1.9.3'
 require 'pathname'
 
 module Xcodeproj
@@ -39,6 +38,7 @@ module Xcodeproj
           raise TypeError, "The given `#{path}` must be a string or 'pathname'."
         end
         path = path.to_s
+        raise IOError, 'Empty path.' if path == ''
 
         success = false
         if DevToolsCore.load_xcode_frameworks && path.end_with?('pbxproj')
@@ -59,10 +59,25 @@ module Xcodeproj
         unless File.exist?(path)
           raise ArgumentError, "The plist file at path `#{path}` doesn't exist."
         end
+        if file_in_conflict?(path)
+          raise ArgumentError, "The file `#{path}` is in a merge conflict"
+        end
         CoreFoundation.RubyHashPropertyListRead(path)
       end
 
       private
+
+      # @return [Bool] Checks whether there are merge conflicts in the file.
+      #
+      # @param  [#to_s] path
+      #         The path of the file.
+      #
+      def file_in_conflict?(path)
+        file = File.open(path)
+        file.each_line.any? { |l| l.match(/^(<|=|>){7}/) }
+      ensure
+        file.close
+      end
 
       # Serializes a hash as an ASCII property list file, using Xcode private API.
       #
@@ -89,31 +104,6 @@ module Xcodeproj
         end
 
         success
-      end
-    end
-  end
-end
-
-# Define compatibility with older Fiddle implementation in Ruby 1.9.3.
-#
-# @!visibility private
-#
-module Fiddle
-  SIZEOF_INTPTR_T = DL::SIZEOF_VOIDP unless defined?(SIZEOF_INTPTR_T)
-  NULL = DL::NULL unless defined?(NULL)
-  Handle = DL::Handle unless defined?(Handle)
-  DLError = DL::DLError unless defined?(DLError)
-
-  unless respond_to?(:dlopen)
-    def self.dlopen(library)
-      DL.dlopen(library)
-    end
-  end
-
-  class Function
-    unless public_method_defined?(:to_i)
-      def to_i
-        @ptr.to_i
       end
     end
   end

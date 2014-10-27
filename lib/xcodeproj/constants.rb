@@ -37,6 +37,7 @@ module Xcodeproj
         PBXProject
         PBXTargetDependency
         PBXReferenceProxy
+        AbstractTarget
       ),
 
       'AbstractBuildPhase' => %w(
@@ -59,10 +60,6 @@ module Xcodeproj
         PBXVariantGroup
       ),
     }.freeze
-
-    # @return [Array] The list of the super classes for each ISA.
-    #
-    ISAS_SUPER_CLASSES = %w(AbstractObject AbstractBuildPhase PBXGroup)
 
     # @return [Hash] The known file types corresponding to each extension.
     #
@@ -214,6 +211,13 @@ module Xcodeproj
       :shared_frameworks  => '11',
       :shared_support     => '12',
       :plug_ins           => '13',
+    }.freeze
+
+    # @return [Hash] The corresponding numeric value of each proxy type for
+    #         PBXContainerItemProxy.
+    PROXY_TYPES = {
+      :native_target => '1',
+      :reference     => '2',
     }.freeze
 
     # @return [Hash] The extensions which are associated with header files.

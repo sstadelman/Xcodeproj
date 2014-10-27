@@ -173,6 +173,8 @@ module ProjectSpecs
 
       describe '#add_dependency' do
 
+        extend SpecHelper::TemporaryDirectory
+
         it 'adds a dependency on another target' do
           dependency_target = @project.new_target(:static_library, 'Pods-SMCalloutView', :ios)
           @target.add_dependency(dependency_target)
@@ -195,9 +197,18 @@ module ProjectSpecs
 
           @target.dependencies.count.should == 1
           target_dependency = @target.dependencies.first
-          target_dependency.target.should == dependency_target
+          target_dependency.target.should.be.nil
 
-          target_dependency.target_proxy.container_portal.should == subproject_file_reference.uuid
+          container_proxy = target_dependency.target_proxy
+          container_proxy.container_portal.should == subproject_file_reference.uuid
+          container_proxy.remote_global_id_string.should == dependency_target.uuid
+
+          # Regression test: Ensure that we can open the modified project
+          # without attempting to initialize an object with an unknown UUID
+          Xcodeproj::UI.stubs(:warn).never
+          temp_path = temporary_directory + 'ProjectWithTargetDependencyToSubproject.xcodeproj'
+          @project.save(temp_path)
+          Xcodeproj::Project.open(temp_path)
         end
 
         it "doesn't add a dependency on a target in an unknown project" do
@@ -214,6 +225,26 @@ module ProjectSpecs
           @target.add_dependency(dependency_target)
           @target.add_dependency(dependency_target)
           @target.dependencies.count.should == 1
+        end
+      end
+
+      describe '#dependency_for_target' do
+        before do
+          subproject_path = fixture_path('Sample Project/ReferencedProject/ReferencedProject.xcodeproj')
+          @subproject = Xcodeproj::Project.open(subproject_path)
+
+          project_path = fixture_path('Sample Project/ContainsSubproject/ContainsSubproject.xcodeproj')
+          @project = Xcodeproj::Project.open(project_path)
+        end
+
+        it 'returns the dependency for targets from the current project' do
+          @target = @project.targets.find { |t| t.name == 'ContainsSubprojectTests' }
+          @target.dependency_for_target(@project.targets.first).should == @target.dependencies.first
+        end
+
+        it 'returns the dependency for targets from a subproject' do
+          @target = @project.targets.first
+          @target.dependency_for_target(@subproject.targets.first).should == @target.dependencies.first
         end
       end
     end
@@ -451,7 +482,7 @@ module ProjectSpecs
         end
       end
 
-      it 'adds a list of sources file to the target to the source build phase' do
+      it 'adds a list of source files to the target to the source build phase' do
         ref = @project.main_group.new_file('Class.m')
         @target.add_file_references([ref], '-fobjc-arc')
         build_files = @target.source_build_phase.files
@@ -460,13 +491,29 @@ module ProjectSpecs
         build_files.first.settings.should == { 'COMPILER_FLAGS' => '-fobjc-arc' }
       end
 
-      it 'adds a list of headers file to the target header build phases' do
+      it 'adds a list of header files to the target header build phases' do
         ref = @project.main_group.new_file('Class.h')
         @target.add_file_references([ref], '-fobjc-arc')
         build_files = @target.headers_build_phase.files
         build_files.count.should == 1
         build_files.first.file_ref.path.should == 'Class.h'
         build_files.first.settings.should.be.nil
+      end
+
+      it 'returns a list of header files to the target header build phases' do
+        ref = @project.main_group.new_file('Class.h')
+        new_build_files = @target.add_file_references([ref], '-fobjc-arc')
+        build_files = @target.headers_build_phase.files
+        new_build_files.should == build_files
+      end
+
+      it 'yields a list of header files to the target header build phases' do
+        ref = @project.main_group.new_file('Class.h')
+        build_files = @target.add_file_references([ref], '-fobjc-arc') do |build_file|
+          build_file.should.be.an.instance_of?(PBXBuildFile)
+          build_file.settings = { 'ATTRIBUTES' => ['Public'] }
+        end
+        build_files.first.settings.should == { 'ATTRIBUTES' => ['Public'] }
       end
 
       it 'adds a list of resources to the resources build phase' do
