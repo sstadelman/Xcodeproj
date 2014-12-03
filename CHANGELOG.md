@@ -1,5 +1,83 @@
 # Xcodeproj Changelog
 
+## Master
+
+##### Breaking
+
+* `Constants` The build settings match now those from Xcode 6.1.  
+  [Marius Rackwitz](https://github.com/mrackwitz)
+  [Kyle Fuller](https://github.com/kylef)
+  [Xcodeproj#166](https://github.com/CocoaPods/Xcodeproj/pull/166)
+
+
+##### Enhancements
+
+* `ProjectHelper` The `::common_build_settings` method supports now a new
+  parameter `language` to select the language used in the target. Acceptable
+  options are either `:objc` or `:swift`.  
+  [Marius Rackwitz](https://github.com/mrackwitz)
+  [Xcodeproj#166](https://github.com/CocoaPods/Xcodeproj/pull/166)
+
+* `ProjectHelper` Supports to create framework targets for iOS & OSX with the
+  correct build settings.  
+  [Marius Rackwitz](https://github.com/mrackwitz)
+  [Xcodeproj#166](https://github.com/CocoaPods/Xcodeproj/pull/164)
+
+* `Commands` Xcodeproj CLI has a new command `config-dump`, which allows to
+  read the build settings from all configurations of all targets of a given
+  Xcode project and serialize them to .xcconfig files.  
+  [Marius Rackwitz](https://github.com/mrackwitz)
+  [Xcodeproj#166](https://github.com/CocoaPods/Xcodeproj/pull/166)
+
+
+##### Development Enhancements
+
+* `Rakefile` Brings a set of new tasks to interactively generate fixture targets
+  for all target configurations supported by Xcode to update the xcconfig
+  fixtures used for the new specs, which check the build settings constants.  
+  [Marius Rackwitz](https://github.com/mrackwitz)
+  [Xcodeproj#166](https://github.com/CocoaPods/Xcodeproj/pull/166)
+
+
+## 0.20.2
+
+##### Bug Fixes
+
+* `FileReference` Fixes an issue that caused project names containing
+  `"`, `'`, `&`, `<` or `>` to produce a workspace that Xcode could not open.  
+  [Hugo Tunius](https://github.com/K0nserv)
+  [CocoaPods#2807](https://github.com/CocoaPods/CocoaPods/issues/2807)
+
+
+## 0.20.1
+
+###### Minor Enhancements
+
+* `Project` Make `#==` a fast shallow comparison method, which operates only on
+  its root object UUID and its path on disk. For full data comparisons, use the
+  `#eql?` method instead.  
+  [Eloy Durán](https://github.com/alloy)
+  [Xcodeproj#216](https://github.com/CocoaPods/Xcodeproj/pull/216)
+
+* `NativeTarget` Make adding a target dependency O(1) constant speed.  
+  [Eloy Durán](https://github.com/alloy)
+  [Xcodeproj#216](https://github.com/CocoaPods/Xcodeproj/pull/216)
+
+* `Object` Cache an object's plist name, which is used very often during project
+  generation.  
+  [Eloy Durán](https://github.com/alloy)
+  [Xcodeproj#216](https://github.com/CocoaPods/Xcodeproj/pull/216)
+
+###### Bug Fixes
+
+* `CoreFoundation` Hopefully fix a Ruby constant lookup issue. We have been
+  unable to reproduce this, but since more than one person has reported it,
+  we're including this fix in the hope it fixes this esoteric issue.  
+  [Eloy Durán](https://github.com/alloy)
+  [CocoaPods#2632](https://github.com/CocoaPods/CocoaPods/issues/2632)
+  [CocoaPods#2739](https://github.com/CocoaPods/CocoaPods/issues/2739)
+
+
 ## 0.20.0
 
 ###### Breaking
@@ -157,6 +235,7 @@
 * [Workspace] Fixed adding a project to a workspace.
   [Alessandro Orrù](https://github.com/alessandroorru)
   [Xcodeproj#155](https://github.com/CocoaPods/Xcodeproj/pull/155)
+
 
 ## 0.17.0
 

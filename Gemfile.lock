@@ -1,16 +1,19 @@
 PATH
   remote: .
   specs:
-    xcodeproj (0.20.0)
-      activesupport (~> 3.0)
+    xcodeproj (0.20.2)
+      activesupport (>= 3)
       colored (~> 1.2)
 
 GEM
   remote: http://rubygems.org/
   specs:
-    activesupport (3.2.19)
-      i18n (~> 0.6, >= 0.6.4)
-      multi_json (~> 1.0)
+    activesupport (4.1.7)
+      i18n (~> 0.6, >= 0.6.9)
+      json (~> 1.7, >= 1.7.7)
+      minitest (~> 5.1)
+      thread_safe (~> 0.1)
+      tzinfo (~> 1.1)
     ast (2.0.0)
     astrolabe (1.3.0)
       parser (>= 2.2.0.pre.3, < 3.0)
@@ -21,6 +24,7 @@ GEM
     docile (1.1.5)
     ffi (1.9.6)
     i18n (0.6.11)
+    json (1.7.7)
     kicker (3.0.0)
       listen (~> 1.3.0)
       notify (~> 0.5.2)
@@ -29,38 +33,42 @@ GEM
       rb-inotify (>= 0.9)
       rb-kqueue (>= 0.2)
     metaclass (0.0.4)
+    minitest (5.4.2)
     mocha (1.1.0)
       metaclass (~> 0.0.1)
     mocha-on-bacon (0.2.2)
       mocha (>= 0.13.0)
     multi_json (1.10.1)
     notify (0.5.2)
-    parser (2.2.0.pre.5)
+    parser (2.2.0.pre.7)
       ast (>= 1.1, < 3.0)
       slop (~> 3.4, >= 3.4.5)
     powerpack (0.0.9)
     prettybacon (0.0.2)
       bacon (~> 1.2)
     rainbow (2.0.0)
-    rake (10.1.1)
+    rake (10.3.2)
     rb-fsevent (0.9.4)
     rb-inotify (0.9.5)
       ffi (>= 0.5.0)
     rb-kqueue (0.2.3)
       ffi (>= 0.5.0)
-    rubocop (0.26.1)
+    rubocop (0.27.1)
       astrolabe (~> 1.3)
-      parser (>= 2.2.0.pre.4, < 3.0)
+      parser (>= 2.2.0.pre.7, < 3.0)
       powerpack (~> 0.0.6)
       rainbow (>= 1.99.1, < 3.0)
       ruby-progressbar (~> 1.4)
-    ruby-progressbar (1.6.0)
+    ruby-progressbar (1.7.0)
     simplecov (0.9.1)
       docile (~> 1.1.0)
       multi_json (~> 1.0)
       simplecov-html (~> 0.8.0)
     simplecov-html (0.8.0)
     slop (3.6.0)
+    thread_safe (0.3.4)
+    tzinfo (1.2.2)
+      thread_safe (~> 0.1)
 
 PLATFORMS
   ruby
@@ -68,11 +76,12 @@ PLATFORMS
 DEPENDENCIES
   bacon
   codeclimate-test-reporter
+  json (= 1.7.7)
   kicker
   mocha
   mocha-on-bacon
   prettybacon
-  rake (~> 10.1.0)
+  rake
   rubocop
   simplecov
   xcodeproj!

@@ -1,13 +1,11 @@
 # Set up coverage analysis
 #-----------------------------------------------------------------------------#
 
-if RUBY_VERSION >= '1.9.3'
-  require 'codeclimate-test-reporter'
-  CodeClimate::TestReporter.configure do |config|
-    config.logger.level = Logger::WARN
-  end
-  CodeClimate::TestReporter.start
+require 'codeclimate-test-reporter'
+CodeClimate::TestReporter.configure do |config|
+  config.logger.level = Logger::WARN
 end
+CodeClimate::TestReporter.start
 
 # Set up
 #-----------------------------------------------------------------------------#
@@ -26,6 +24,7 @@ require 'xcodeproj'
 
 $LOAD_PATH.unshift((ROOT + 'spec').to_s)
 require 'spec_helper/project'
+require 'spec_helper/project_helper'
 require 'spec_helper/temporary_directory'
 
 def fixture_path(path)
